@@ -2,8 +2,11 @@ package tgt.igniteplus.users.controller;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import tgt.igniteplus.users.entities.User;
+import tgt.igniteplus.users.exceptions.UserNotFoundException;
 import tgt.igniteplus.users.services.UserService;
 
 import javax.validation.constraints.NotNull;
@@ -31,18 +34,26 @@ public class UserController {
     //getUserById
     @GetMapping("/user/{id}")
     public Optional<User> getUserBYId(@NotNull @PathVariable("id") Long id){
-        return userService.getUserById(id);
+        try {
+            return userService.getUserById(id);
+        } catch (UserNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,e.getMessage());
+        }
     }
 
     //updateUserById
     @PutMapping("/users/{id}")
     public User updateUserById(@PathVariable Long id,@RequestBody User user){
-        return userService.updateUserById(id,user);
+        try {
+            return userService.updateUserById(id,user);
+        } catch (UserNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,e.getMessage());
+        }
     }
 
     //deleteUserById
     @DeleteMapping("/users/{id}")
-    public void deleteUserById(@PathVariable("id") Long id){
+    public void deleteUserById(@PathVariable("id") Long id)throws UserNotFoundException{
         userService.deleteUserByID(id);
     }
 }
